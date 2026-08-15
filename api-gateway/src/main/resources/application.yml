@@ -12,28 +12,15 @@ spring:
       server:
         webflux:
           routes:
-            - id: employee-service
-              uri: lb://EMPLOYEE-SERVICE
+            - id: user-service
+              uri: lb://USER-SERVICE
               predicates:
-                - Path=/employees/**
+                - Path=/users/**
 
-
-            - id: customer-service
-              uri: lb://CUSTOMER-SERVICE
+            - id: event-service
+              uri: lb://EVENT-SERVICE
               predicates:
-                - Path=/customers/**
-
-
-            - id: product-service
-              uri: lb://PRODUCT-SERVICE
-              predicates:
-                - Path=/products/**
-
-
-            - id: order-service
-              uri: lb://ORDER-SERVICE
-              predicates:
-                - Path=/orders/**
+                - Path=/events/**
 
 
 eureka:

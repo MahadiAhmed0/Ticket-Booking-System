@@ -135,24 +135,23 @@ justifications below explain why the more significant services were kept separat
 
 ### 5.1 Chosen Services
 
-For the scope of this course project, the following **5 core microservices** were selected for
-implementation:
+For the scope of this course project, the system is kept intentionally small — **3 core
+microservices**:
 
-1. **User Service** – registration, login, JWT-based authentication, profile management.
-2. **Event Service** – manages events, venues, showtimes, and seat availability data.
-3. **Booking Service** – orchestrates the booking workflow: validates seat availability, creates orders,
-   coordinates payment, confirms/cancels bookings.
-4. **Payment Service** – simulates payment processing and emits payment result events.
-5. **Notification Service** – consumes booking/payment events asynchronously and sends confirmation
-   emails.
+1. **User Service** – user registration and profile management (currently implemented).
+2. **Event Service** – manages events, venues, and seat availability data (currently implemented).
+3. **Booking Service** – orchestrates the booking workflow: validates seat availability, creates
+   bookings, coordinates payment, confirms/cancels bookings *(planned — folder reserved)*.
+
+Payment and Notification concerns are folded into the Booking Service: payment is a simulated
+synchronous call, and the confirmation email is a fire-and-forget side effect after the booking is
+confirmed.
 
 **Supporting infrastructure components:**
 
 - **API Gateway** (Spring Cloud Gateway) – single entry point for the frontend.
 - **Service Registry** (Netflix Eureka) – service discovery for all microservices.
-- **Config Server** (Spring Cloud Config) – optional centralized configuration.
-- **Message Broker** (RabbitMQ / Kafka) – for asynchronous events between Booking, Payment, and
-  Notification services.
+- **Message Broker** (RabbitMQ / Kafka) – for asynchronous events between services.
 
 ### 5.2 Interaction Overview
 
@@ -162,32 +161,27 @@ implementation:
 - Booking Service → Event Service: checks seat availability and retrieves pricing information.
 - Booking Service → User Service: validates the authenticated user (or JWT is validated directly at
   the Gateway).
-- Booking Service → Payment Service: submits a payment request synchronously and awaits an immediate
-  accept/reject response.
 
 **Asynchronous communication** (event-driven, via message broker):
 
-- Payment Service publishes a `PaymentCompleted` or `PaymentFailed` event → consumed by Booking
-  Service to finalize or cancel the order.
-- Booking Service publishes a `BookingConfirmed` event → consumed by Notification Service, which
-  sends a confirmation email.
+- Booking Service publishes a `BookingConfirmed` event → consumed by another service (or an internal
+  listener) to finalize the booking and send a confirmation email.
 
 **Typical end-to-end booking flow:**
 
 1. User browses events: Frontend → Gateway → Event Service.
 2. User selects seats and initiates checkout: Frontend → Gateway → Booking Service.
 3. Booking Service calls Event Service to re-verify seat availability and lock the seat.
-4. Booking Service creates a PENDING order and calls Payment Service synchronously.
-5. Payment Service processes payment and returns a result; it also emits an async event.
-6. On success, Booking Service marks the order CONFIRMED and emits a `BookingConfirmed` event.
-7. Notification Service consumes the event and sends a confirmation email to the user.
+4. Booking Service creates a PENDING booking and processes the (simulated) payment synchronously.
+5. On success, Booking Service marks the booking CONFIRMED and emits a `BookingConfirmed` event.
+6. The confirmation email is sent as a fire-and-forget side effect after confirmation.
 
 ---
 
 ## 6. System Architecture Diagram
 
 The figure below illustrates the overall system architecture, showing the frontend, API Gateway,
-Service Registry, the five core microservices, their databases, and the message broker used for
+Service Registry, the three core microservices, their databases, and the message broker used for
 asynchronous communication.
 
 ```
@@ -197,19 +191,18 @@ asynchronous communication.
                              v
                     API Gateway
                (Spring Cloud Gateway)
-                   /    |    |    |    \
-                  /     |    |    |     \
-                 v      v    v    v      v
-              User   Event Booking Payment Notification
-             Service Service Service Service  Service
-                |      |      |      |        |
-             User DB Event DB Booking Payment
-                              DB       DB
-                       \       |       /
-                        \      |      /
-                         v     v     v
-                       Message Broker
-                     (RabbitMQ / Kafka)
+                      /    |    \
+                     /     |     \
+                    v      v      v
+                 User   Event  Booking
+                Service Service  Service
+                   |       |       |
+                User DB  Event DB Booking DB
+                   \       |       /
+                    \      |      /
+                     v     v     v
+                   Message Broker
+                 (RabbitMQ / Kafka)
                              |
                              v
                     Service Registry (Eureka)
@@ -277,11 +270,9 @@ The figure below shows the primary use cases for the chosen services, covering t
 
 ```
 Ticket-Booking-System/
-├── user-service/              # User Service (port 9001)
-├── event-service/             # Event / Catalog Service (port 9002)
-├── booking-service/           # Booking / Order Service (port 9003)
-├── payment-service/           # Payment Service (port 9004)
-├── notification-service/      # Notification Service (port 8002, RabbitMQ consumer)
+├── user-service/              # User Service (port 9002) — implemented
+├── event-service/             # Event / Catalog Service (port 9003) — implemented
+├── booking-service/           # Booking / Order Service (port 9004) — reserved
 ├── api-gateway/               # Spring Cloud Gateway — single entry point (port 8080)
 ├── service-registry/          # Eureka Server — service discovery (port 8761)
 └── README.md
@@ -292,7 +283,7 @@ Ticket-Booking-System/
 ## 10. Conclusion
 
 This report outlined the design of a Ticket Booking System built on a microservices architecture. By
-decomposing the system into services with clear responsibilities – User, Event, Booking, Payment, and
-Notification – and supporting them with a Service Registry, API Gateway, and both synchronous and
-asynchronous communication mechanisms, the project demonstrates the core principles taught in the
-Software Design and Architectures course while remaining scoped appropriately for a semester project.
+decomposing the system into services with clear responsibilities – User, Event, and Booking – and
+supporting them with a Service Registry, API Gateway, and both synchronous and asynchronous
+communication mechanisms, the project demonstrates the core principles taught in the Software Design
+and Architectures course while remaining scoped appropriately for a semester project.
