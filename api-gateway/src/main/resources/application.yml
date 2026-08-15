@@ -1,0 +1,44 @@
+server:
+  port: 8080
+
+
+spring:
+  application:
+    name: API-GATEWAY
+
+
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: employee-service
+              uri: lb://EMPLOYEE-SERVICE
+              predicates:
+                - Path=/employees/**
+
+
+            - id: customer-service
+              uri: lb://CUSTOMER-SERVICE
+              predicates:
+                - Path=/customers/**
+
+
+            - id: product-service
+              uri: lb://PRODUCT-SERVICE
+              predicates:
+                - Path=/products/**
+
+
+            - id: order-service
+              uri: lb://ORDER-SERVICE
+              predicates:
+                - Path=/orders/**
+
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/

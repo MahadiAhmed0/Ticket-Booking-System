@@ -1,0 +1,202 @@
+MICROSERVICES TESTING GUIDE (NOOB FRIENDLY)
+============================================
+
+WHAT THIS PROJECT IS
+--------------------
+A Spring Boot microservices demo using:
+  - Eureka (service registry) - services register here so the gateway can find them
+  - API Gateway - one single entry point on port 8080
+  - MongoDB Atlas - cloud database (orders, customers, employees, products)
+  - RabbitMQ - order-service publishes an event, inventory-service listens
+
+SERVICES AND PORTS
+------------------
+  service-registry  -> http://localhost:8761   (Eureka dashboard)
+  api-gateway       -> http://localhost:8080   (the main URL you use)
+  employee-service  -> http://localhost:9001
+  customer-service  -> http://localhost:9002
+  product-service   -> http://localhost:9003
+  order-service     -> http://localhost:9004
+  inventory-service -> http://localhost:8002   (no REST endpoint, only listens on RabbitMQ)
+  RabbitMQ          -> http://localhost:15672  (login: guest / guest)
+
+STARTUP ORDER (IMPORTANT)
+-------------------------
+Start them in this order, each in its own folder with:  mvnw.cmd spring-boot:run
+  1. service-registry   (wait until it shows Tomcat started on port 8761)
+  2. api-gateway
+  3. customer-service, employee-service, product-service, order-service
+  4. inventory-service  (optional - only needed to see the RabbitMQ message
+     and the inventory fulfillment check)
+
+You can also run them from IntelliJ by right-clicking the Application class -> Run.
+
+RULE OF THUMB: Always use port 8080 (the gateway), NOT the direct ports.
+
+HOW TO SEND REQUESTS
+--------------------
+Use Postman, IntelliJ (create a new HTTP request), or your browser.
+In Postman: choose method (GET/POST), paste the URL, set Body = raw / JSON
+for POST requests, then press Send.
+
+=================================================================
+1. CREATE AN ORDER  (publishes a RabbitMQ event, saves to MongoDB)
+=================================================================
+   URL:      http://localhost:8080/orders/
+   Method:   POST
+   Body (JSON):
+       {
+         "productId": "P001",
+         "customerId": "cust2",
+         "quantity": 3,
+         "price": 99.98
+       }
+
+   EXPECTED: 200 OK with a JSON response containing an "id", e.g.:
+       {
+         "id": "6a70359835f5b3f60cdf67e4",
+         "productId": "P001",
+         "customerId": "cust2",
+         "quantity": 3,
+         "price": 99.98
+       }
+
+   NOTE: Copy that "id" - you need it for the GET request below.
+   productId MUST match one of the seeded inventory products (P001, P002
+   or P003) - otherwise inventory-service reports it can't fulfill the order.
+
+   INVENTORY CHECK - WHAT THE CONSOLE SHOULD SHOW
+   ----------------------------------------------
+   inventory-service keeps a tiny in-memory catalog (restarting it resets stock):
+       P001 = Laptop   (10 in stock)
+       P002 = Mouse    (5 in stock)
+       P003 = Keyboard (3 in stock)
+
+   Send a few orders with different quantities and watch the inventory-service
+   console. Every order produces exactly one message:
+
+   EXAMPLE 1 - enough stock (fulfilled, stock reduced):
+       POST productId=P001, quantity=3
+       Order <id> fulfilled: 3 x Laptop (P001). Remaining stock: 7.
+
+   EXAMPLE 2 - still enough after that (fulfilled, stock now 0):
+       POST productId=P001, quantity=7
+       Order <id> fulfilled: 7 x Laptop (P001). Remaining stock: 0.
+
+   EXAMPLE 3 - more than the remaining stock (NOT fulfilled, why is printed):
+       POST productId=P001, quantity=2
+       Order <id> could not be fulfilled: requested quantity 2 exceeds
+       available stock of 0 for Laptop (P001).
+
+   EXAMPLE 4 - unknown product (NOT fulfilled):
+       POST productId=p1, quantity=1
+       Order <id> could not be fulfilled: product p1 not found in inventory.
+
+-----------------------------------------------------------------
+2. GET AN ORDER BY ID
+-----------------------------------------------------------------
+   URL:      http://localhost:8080/orders/<the-id-from-step-1>
+             (example: http://localhost:8080/orders/6a70359835f5b3f60cdf67e4)
+   Method:   GET
+   Body:     none
+
+   EXPECTED: 200 OK with the same JSON you created in step 1.
+
+=================================================================
+3. CREATE A CUSTOMER
+=================================================================
+   URL:      http://localhost:8080/customers/
+   Method:   POST
+   Body (JSON):
+       {
+         "name": "Alice",
+         "address": "Dhaka",
+         "age": 25
+       }
+
+   EXPECTED: 200 OK with the customer JSON including its "id".
+
+-----------------------------------------------------------------
+4. GET A CUSTOMER BY ID
+-----------------------------------------------------------------
+   URL:      http://localhost:8080/customers/<the-id-from-step-3>
+   Method:   GET
+   Body:     none
+
+   EXPECTED: 200 OK with the customer JSON.
+
+=================================================================
+5. CREATE AN EMPLOYEE
+=================================================================
+   URL:      http://localhost:8080/employees/
+   Method:   POST
+   Body (JSON):
+       {
+         "name": "Bob",
+         "designation": "Engineer",
+         "salary": 50000.0
+       }
+
+   EXPECTED: 200 OK with the employee JSON including its "id".
+
+-----------------------------------------------------------------
+6. GET AN EMPLOYEE BY ID
+-----------------------------------------------------------------
+   URL:      http://localhost:8080/employees/<the-id-from-step-5>
+   Method:   GET
+
+   EXPECTED: 200 OK with the employee JSON.
+
+=================================================================
+7. CREATE A PRODUCT
+=================================================================
+   URL:      http://localhost:8080/products/
+   Method:   POST
+   Body (JSON):
+       {
+         "name": "Laptop",
+         "desc": "16GB RAM",
+         "price": 85000.0
+       }
+
+   EXPECTED: 200 OK with the product JSON including its "id".
+
+-----------------------------------------------------------------
+8. GET A PRODUCT BY ID
+-----------------------------------------------------------------
+   URL:      http://localhost:8080/products/<the-id-from-step-7>
+   Method:   GET
+
+   EXPECTED: 200 OK with the product JSON.
+
+=================================================================
+BONUS - CHECK THE REGISTRY
+=================================================================
+   URL:      http://localhost:8761/   (open in your browser)
+   You should see all services listed as UP:
+       ORDER-SERVICE, CUSTOMER-SERVICE, EMPLOYEE-SERVICE,
+       PRODUCT-SERVICE, API-GATEWAY, INVENTORY-SERVICE
+
+=================================================================
+COMMON PROBLEMS AND FIXES
+=================================================================
+   - 503 Service Unavailable when calling the gateway:
+       The target service is not running or not registered in Eureka.
+       Make sure that service is started and wait ~10-20 seconds,
+       then refresh http://localhost:8761 and check it shows UP.
+
+   - 405 Method Not Allowed:
+       That URL+method combination doesn't exist. e.g. GET on
+       http://localhost:8080/orders/ is NOT defined; only POST /orders/
+       and GET /orders/{id} exist. Opening /orders/ in a browser gives
+       405 - that is expected, not an error.
+
+   - 404 Not Found:
+       Wrong URL, or the service/route doesn't exist yet.
+
+   - Order creates fine but no "fulfilled" message in the inventory console:
+        inventory-service isn't running. Start it before creating the order.
+        Also check the productId in the order matches P001 / P002 / P003.
+
+   - Connection refused:
+       The service you called isn't running. Start it.
