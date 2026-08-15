@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TicketBook — Microservices Test</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">Ticket<span>Book</span></div>
+    <div class="api-status">
+      <span class="dot"></span> API Gateway <code>localhost:8080</code>
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Find your next event.</h1>
+    <p>Simple frontend to test the Ticket Booking System microservices (User &amp; Event services).</p>
+  </section>
+
+  <main class="grid">
+
+    <!-- EVENTS -->
+    <section class="card">
+      <h2>Events</h2>
+      <p class="hint">POST + GET via <code>/events</code></p>
+
+      <form id="event-form" class="form">
+        <input type="text" name="name" placeholder="Event name" required />
+        <input type="text" name="venue" placeholder="Venue" required />
+        <input type="text" name="date" placeholder="Date (e.g. 2026-08-20)" required />
+        <input type="number" name="price" placeholder="Price" step="0.01" required />
+        <button type="submit">Add Event</button>
+      </form>
+
+      <div class="response" id="event-response"></div>
+      <div class="list" id="event-list"></div>
+    </section>
+
+    <!-- USERS -->
+    <section class="card">
+      <h2>Users</h2>
+      <p class="hint">POST + GET via <code>/users</code></p>
+
+      <form id="user-form" class="form">
+        <input type="text" name="name" placeholder="Name" required />
+        <input type="email" name="email" placeholder="Email" required />
+        <input type="password" name="password" placeholder="Password" required />
+        <button type="submit">Register User</button>
+      </form>
+
+      <div class="response" id="user-response"></div>
+      <div class="list" id="user-list"></div>
+    </section>
+
+  </main>
+
+  <footer class="foot">SWE 4602 — Ticket Booking System · User Service + Event Service</footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

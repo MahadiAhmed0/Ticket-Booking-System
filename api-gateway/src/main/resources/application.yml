@@ -22,6 +22,14 @@ spring:
               predicates:
                 - Path=/events/**
 
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+
 
 eureka:
   client:
