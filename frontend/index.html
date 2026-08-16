@@ -3,61 +3,131 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TicketBook — Microservices Test</title>
+  <title>TicketBook — Microservices Demo</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
   <header class="topbar">
     <div class="logo">Ticket<span>Book</span></div>
-    <div class="api-status">
-      <span class="dot"></span> API Gateway <code>localhost:8080</code>
+    <div class="status-pills" id="status-pills">
+      <span class="pill checking">checking services…</span>
     </div>
   </header>
 
+  <div class="down-banner" id="down-banner" style="display:none">
+    <span class="warn">&#9888;</span>
+    <span id="down-text"></span>
+  </div>
+
   <section class="hero">
-    <h1>Find your next event.</h1>
-    <p>Simple frontend to test the Ticket Booking System microservices (User &amp; Event services).</p>
+    <h1>One booking. <span class="grad">Five microservices.</span></h1>
+    <p class="sub">
+      Watch a single ticket purchase travel through the system — synchronous REST calls,
+      Eureka service discovery, and asynchronous RabbitMQ events.
+    </p>
   </section>
 
-  <main class="grid">
+  <main class="layout">
 
-    <!-- EVENTS -->
-    <section class="card">
-      <h2>Events</h2>
-      <p class="hint">POST + GET via <code>/events</code></p>
+    <div class="col-left">
+      <section class="panel">
+        <div class="panel-head">
+          <h3><span class="live-dot"></span> Live Activity</h3>
+          <button id="clear-feed" class="mini">clear</button>
+        </div>
+        <div class="feed-wrap">
+          <div class="feed" id="feed">
+            <div class="feed-line muted">Waiting for a demo to start…</div>
+          </div>
+        </div>
+      </section>
+    </div>
 
-      <form id="event-form" class="form">
-        <input type="text" name="name" placeholder="Event name" required />
-        <input type="text" name="venue" placeholder="Venue" required />
-        <input type="text" name="date" placeholder="Date (e.g. 2026-08-20)" required />
-        <input type="number" name="price" placeholder="Price" step="0.01" required />
-        <button type="submit">Add Event</button>
-      </form>
+    <div class="col-right">
+      <section class="panel">
+        <div class="panel-head"><h3>Manual Steps</h3></div>
+        <div class="steps-body">
 
-      <div class="response" id="event-response"></div>
-      <div class="list" id="event-list"></div>
-    </section>
+        <form id="step1" class="step">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <div class="step-title">Register a user <code>/users</code></div>
+            <div class="row">
+              <input name="name" placeholder="Name" value="Demo User" />
+              <input name="email" placeholder="Email" value="demo@example.com" />
+            </div>
+            <button class="btn small">Register</button>
+            <div class="step-out" data-out="1"></div>
+          </div>
+        </form>
 
-    <!-- USERS -->
-    <section class="card">
-      <h2>Users</h2>
-      <p class="hint">POST + GET via <code>/users</code></p>
+        <form id="step2" class="step">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <div class="step-title">Create an event <code>/events</code> (admin)</div>
+            <div class="row">
+              <input name="name" placeholder="Event name" value="Coldplay Live" />
+              <input name="venue" placeholder="Venue" value="National Stadium" />
+            </div>
+            <div class="row">
+              <input name="date" placeholder="Date" value="2026-09-01" />
+              <input name="price" placeholder="Price/seat" value="40" type="number" step="0.01" />
+              <input name="totalSeats" placeholder="Seats" value="100" type="number" />
+            </div>
+            <button class="btn small">Create Event</button>
+            <div class="step-out" data-out="2"></div>
+          </div>
+        </form>
 
-      <form id="user-form" class="form">
-        <input type="text" name="name" placeholder="Name" required />
-        <input type="email" name="email" placeholder="Email" required />
-        <input type="password" name="password" placeholder="Password" required />
-        <button type="submit">Register User</button>
-      </form>
+        <form id="step3" class="step">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <div class="step-title">Book tickets <code>/bookings</code></div>
+            <div class="row">
+              <input name="userId" placeholder="User id (auto-filled)" />
+              <input name="eventId" placeholder="Event id (auto-filled)" />
+              <input name="seats" placeholder="Seats" value="2" type="number" min="1" />
+            </div>
+            <button class="btn small">Book Tickets</button>
+            <div class="step-out" data-out="3"></div>
+          </div>
+        </form>
 
-      <div class="response" id="user-response"></div>
-      <div class="list" id="user-list"></div>
-    </section>
+        <form id="step4" class="step">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <div class="step-title">Login &amp; JWT <code>/users/login</code> + <code>/users/me</code></div>
+            <div class="row">
+              <input name="email" placeholder="Email" value="jwt@test.com" />
+              <input name="password" placeholder="Password" value="secret123" />
+            </div>
+            <button class="btn small">Login → JWT + My Profile</button>
+            <div class="step-out" data-out="4"></div>
+          </div>
+        </form>
+
+        </div>
+      </section>
+    </div>
 
   </main>
 
-  <footer class="foot">SWE 4602 — Ticket Booking System · User Service + Event Service</footer>
+  <section class="panel data-panel">
+    <div class="panel-head">
+      <div class="tabs">
+        <button class="tab active" data-tab="users">Users</button>
+        <button class="tab" data-tab="events">Events</button>
+        <button class="tab" data-tab="bookings">Bookings</button>
+        <button class="tab" data-tab="payments">Payments</button>
+        <button class="tab" data-tab="notifications">Emails</button>
+      </div>
+      <label class="autoref"><input type="checkbox" id="autoref" checked /> auto-refresh (6s)</label>
+    </div>
+    <div class="table-wrap" id="data-view"></div>
+  </section>
+
+  <footer class="foot">SWE 4602 — Software Design &amp; Architectures · User + Event + Booking + Payment + Notification</footer>
 
   <script src="app.js"></script>
 </body>

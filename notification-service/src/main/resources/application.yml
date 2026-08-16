@@ -1,0 +1,22 @@
+server:
+  port: 9006
+  tomcat:
+    max-http-request-header-size: 32KB
+
+spring:
+  application:
+    name: NOTIFICATION-SERVICE
+  rabbitmq:
+    host: ${RABBIT_HOST:localhost}
+    port: 5672
+    username: guest
+    password: guest
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+  instance:
+    prefer-ip-address: true

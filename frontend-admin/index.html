@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ticketbook — ADMIN</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">ticket<span>book</span> <b class="admin-tag">ADMIN</b></div>
+    <div class="top-actions" id="top-actions"></div>
+  </header>
+
+  <!-- LOGIN VIEW -->
+  <section id="login-view" class="login-wrap" hidden>
+    <div class="login-box">
+      <h1>ADMIN LOGIN</h1>
+      <p class="hint">Default: admin@example.com / admin123</p>
+      <form id="login-form">
+        <input name="email" type="email" placeholder="Email" value="admin@example.com" required />
+        <input name="password" type="password" placeholder="Password" value="admin123" required />
+        <button class="cta-btn wide" type="submit">LOG IN</button>
+        <div class="form-out" data-out="login"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ADMIN VIEW -->
+  <main id="admin-view" hidden>
+
+    <div class="svc-strip" id="svc-strip">
+      <span class="svc-pill checking"><i></i>checking services…</span>
+    </div>
+
+    <section class="stats" id="stats"></section>
+
+    <section class="panel">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="events">EVENTS</button>
+        <button class="tab-btn" data-tab="bookings">BOOKINGS</button>
+        <button class="tab-btn" data-tab="users">USERS</button>
+        <button class="tab-btn" data-tab="payments">PAYMENTS</button>
+        <button class="tab-btn" data-tab="notifications">EMAILS</button>
+      </div>
+
+      <!-- EVENTS -->
+      <div class="tab-panel" id="tab-events">
+        <div class="split">
+          <div class="form-box">
+            <h2 id="event-form-title">CREATE EVENT</h2>
+            <form id="event-form">
+              <input name="name" placeholder="Event name" required />
+              <input name="venue" placeholder="Venue" required />
+              <input name="date" placeholder="Date (YYYY-MM-DD)" value="2026-12-25" required />
+              <select name="category">
+                <option value="music">MUSIC</option>
+                <option value="sports">SPORTS</option>
+                <option value="arts">ARTS</option>
+                <option value="comedy">COMEDY</option>
+                <option value="family">FAMILY</option>
+              </select>
+              <div class="row">
+                <input name="price" type="number" placeholder="Price/seat" step="0.01" min="1" required />
+                <input name="totalSeats" type="number" placeholder="Total seats" min="1" required />
+              </div>
+              <button class="cta-btn wide" id="event-submit" type="submit">CREATE EVENT</button>
+              <button class="ghost-btn wide hidden" id="edit-cancel" type="button">CANCEL EDIT</button>
+              <div class="form-out" data-out="event"></div>
+            </form>
+          </div>
+          <div class="list-box">
+            <h2>ALL EVENTS <button class="ghost-btn small" id="refresh-events">REFRESH</button></h2>
+            <div id="events-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOOKINGS -->
+      <div class="tab-panel" id="tab-bookings" hidden>
+        <h2>ALL BOOKINGS <button class="ghost-btn small" id="refresh-bookings">REFRESH</button></h2>
+        <div id="bookings-list"></div>
+      </div>
+
+      <!-- USERS -->
+      <div class="tab-panel" id="tab-users" hidden>
+        <h2>ALL USERS <button class="ghost-btn small" id="refresh-users">REFRESH</button></h2>
+        <div id="users-list"></div>
+        <div class="form-box inline">
+          <h2>CREATE ADMIN ACCOUNT</h2>
+          <form id="admin-form">
+            <div class="row">
+              <input name="name" placeholder="Name" required />
+              <input name="email" type="email" placeholder="Email" required />
+              <input name="password" type="password" placeholder="Password" required />
+            </div>
+            <button class="cta-btn" type="submit">CREATE ADMIN</button>
+            <div class="form-out" data-out="admin"></div>
+          </form>
+        </div>
+      </div>
+      <!-- PAYMENTS -->
+      <div class="tab-panel" id="tab-payments" hidden>
+        <h2>ALL PAYMENTS <button class="ghost-btn small" id="refresh-payments">REFRESH</button></h2>
+        <div id="payments-list"></div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="tab-panel" id="tab-notifications" hidden>
+        <h2>EMAILS SENT (NOTIFICATION SERVICE) <button class="ghost-btn small" id="refresh-notifications">REFRESH</button></h2>
+        <div id="notifications-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

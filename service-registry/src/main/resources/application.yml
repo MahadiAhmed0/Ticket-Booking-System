@@ -1,13 +1,15 @@
 server:
   port: 8761
-
+  tomcat:
+    max-http-request-header-size: 32KB
 
 spring:
   application:
     name: SERVICE-REGISTRY
 
-
 eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+  server:
+    enable-self-preservation: false

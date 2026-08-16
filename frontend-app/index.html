@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ticketbook — Get Your Tickets</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="logo">ticket<span>book</span></div>
+    <div class="search">
+      <input id="search-input" type="text" placeholder="Search events, venues..." />
+      <button id="search-btn">SEARCH</button>
+    </div>
+    <div class="header-right">
+      <button class="ghost-btn bell-btn" id="bell-btn" title="Your notifications from the Notification Service">
+        &#128276; NOTIFICATIONS <b id="bell-count">0</b>
+      </button>
+      <div class="auth-area" id="auth-area">
+        <button class="ghost-btn" id="signin-btn">Sign In / Register</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="marquee">
+    <div class="marquee-inner">
+      CONCERTS&nbsp;&bull;&nbsp;SPORTS&nbsp;&bull;&nbsp;ARTS&nbsp;&bull;&nbsp;THEATER&nbsp;&bull;&nbsp;COMEDY&nbsp;&bull;&nbsp;FAMILY&nbsp;&bull;&nbsp;CONCERTS&nbsp;&bull;&nbsp;SPORTS&nbsp;&bull;&nbsp;ARTS&nbsp;&bull;&nbsp;THEATER&nbsp;&bull;&nbsp;COMEDY&nbsp;&bull;&nbsp;FAMILY&nbsp;&bull;&nbsp;
+    </div>
+  </div>
+
+  <div class="svc-strip" id="svc-strip">
+    <span class="svc-pill checking"><i></i>checking services…</span>
+  </div>
+
+  <section class="hero" id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <div class="hero-tag">FEATURED EVENT</div>
+      <h1 id="hero-title">Loading events...</h1>
+      <p id="hero-sub"></p>
+      <button class="cta-btn" id="hero-cta">GET TICKETS &rarr;</button>
+    </div>
+  </section>
+
+  <section class="browse">
+    <div class="filters" id="filters">
+      <button class="chip active" data-cat="all">ALL</button>
+      <button class="chip" data-cat="music">&#127925; MUSIC</button>
+      <button class="chip" data-cat="sports">&#127936; SPORTS</button>
+      <button class="chip" data-cat="arts">&#127912; ARTS</button>
+      <button class="chip" data-cat="comedy">&#128514; COMEDY</button>
+      <button class="chip" data-cat="family">&#127903;&#65039; FAMILY</button>
+    </div>
+    <h2 class="section-title">HAPPENING NOW</h2>
+    <div class="grid" id="event-grid"></div>
+  </section>
+
+  <footer class="foot">
+    <div class="logo small">ticket<span>book</span></div>
+    <p>SWE 4602 — Microservices demo. Powered by User, Event, Booking, Payment &amp; Notification services.
+      <a href="http://localhost:3002" style="color:#ffd400;font-weight:900;">ADMIN PANEL &rarr;</a>
+    </p>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="auth-modal" hidden>
+    <div class="modal auth-box">
+      <button class="close" data-close="auth-modal">&times;</button>
+      <div class="tabs">
+        <button class="tab-btn active" data-mode="login">LOG IN</button>
+        <button class="tab-btn" data-mode="register">REGISTER</button>
+      </div>
+      <form id="login-form" class="mode-panel">
+        <input name="email" type="email" placeholder="Email" required />
+        <input name="password" type="password" placeholder="Password" required />
+        <button class="cta-btn wide" type="submit">LOG IN</button>
+        <div class="form-out" data-out="login"></div>
+      </form>
+      <form id="register-form" class="mode-panel" hidden>
+        <input name="name" placeholder="Full name" required />
+        <input name="email" type="email" placeholder="Email" required />
+        <input name="password" type="password" placeholder="Password" required />
+        <button class="cta-btn wide" type="submit">CREATE ACCOUNT</button>
+        <div class="form-out" data-out="register"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EVENT MODAL -->
+  <div class="modal-overlay" id="event-modal" hidden>
+    <div class="modal event-box">
+      <button class="close" data-close="event-modal">&times;</button>
+      <div class="event-banner" id="ev-banner"></div>
+      <div class="event-body">
+        <div class="event-datebox" id="ev-datebox"></div>
+        <h2 id="ev-name"></h2>
+        <p class="ev-meta" id="ev-meta"></p>
+        <div class="ev-stats">
+          <div class="stat"><b id="ev-seats"></b><span>seats left</span></div>
+          <div class="stat"><b id="ev-price"></b><span>per ticket</span></div>
+        </div>
+        <div class="qty-row">
+          <span class="qty-label">TICKETS</span>
+          <div class="qty">
+            <button id="qty-minus">-</button>
+            <span id="qty-num">2</span>
+            <button id="qty-plus">+</button>
+          </div>
+          <span class="total" id="ev-total"></span>
+        </div>
+        <button class="cta-btn wide" id="buy-btn">BUY NOW &rarr;</button>
+        <div class="form-out" data-out="event"></div>
+        <div class="success-box" id="success-box" hidden>
+          <div class="success-tick">&#10003;</div>
+          <h3>TICKETS CONFIRMED!</h3>
+          <p id="success-text"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MY TICKETS MODAL -->
+  <div class="modal-overlay" id="tickets-modal" hidden>
+    <div class="modal tickets-box">
+      <button class="close" data-close="tickets-modal">&times;</button>
+      <h2>MY TICKETS</h2>
+      <div id="tickets-list"></div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS MODAL (Notification Service) -->
+  <div class="modal-overlay" id="notif-modal" hidden>
+    <div class="modal tickets-box">
+      <button class="close" data-close="notif-modal">&times;</button>
+      <h2>MY NOTIFICATIONS &mdash; NOTIFICATION SERVICE</h2>
+      <div id="notif-list"></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
